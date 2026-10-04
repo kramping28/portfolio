@@ -41,10 +41,88 @@
             }
         }
     </script>
+    <script>
+        try {
+            if (localStorage.getItem('portfolio-theme') === 'light') {
+                document.documentElement.classList.add('light-theme');
+            }
+        } catch (error) {
+            // Theme switching still works when browser storage is unavailable.
+        }
+    </script>
     <style>
         body {
             background-color: #0d0f17;
             color: #f1f5f9;
+        }
+        html.light-theme body {
+            background-color: #f3f5f7;
+            color: #1e293b;
+        }
+        html.light-theme [class*="bg-brand-dark"] {
+            background-color: #f1f4f7;
+        }
+        html.light-theme [class*="bg-brand-card"] {
+            background-color: #ffffff;
+        }
+        html.light-theme [class*="bg-slate-800"] {
+            background-color: #e8edf2;
+        }
+        html.light-theme [class*="border-brand-border"] {
+            border-color: #d7dee7;
+        }
+        html.light-theme [class~="text-white"]:not([class*="bg-blue-"]):not([class*="bg-emerald-"]) {
+            color: #172033;
+        }
+        html.light-theme [class~="text-slate-100"],
+        html.light-theme [class~="text-slate-200"] {
+            color: #334155;
+        }
+        html.light-theme [class~="text-slate-300"] {
+            color: #475569;
+        }
+        html.light-theme [class~="text-slate-400"],
+        html.light-theme [class~="text-slate-500"],
+        html.light-theme [class~="text-slate-600"] {
+            color: #64748b;
+        }
+        html.light-theme [class~="text-gray-300"] {
+            color: #475569;
+        }
+        html.light-theme [class~="text-brand-muted"] {
+            color: #64748b;
+        }
+        html.light-theme [class~="text-brand-accent"],
+        html.light-theme [class~="text-amber-300"],
+        html.light-theme [class~="text-amber-400"] {
+            color: #92400e;
+        }
+        html.light-theme [class~="text-blue-300"],
+        html.light-theme [class~="text-blue-400"] {
+            color: #1d4ed8;
+        }
+        html.light-theme [class~="text-emerald-300"],
+        html.light-theme [class~="text-emerald-400"] {
+            color: #047857;
+        }
+        html.light-theme [class~="text-green-300"],
+        html.light-theme [class~="text-green-400"] {
+            color: #15803d;
+        }
+        html.light-theme [class~="text-cyan-300"],
+        html.light-theme [class~="text-cyan-400"] {
+            color: #0e7490;
+        }
+        html.light-theme [class~="text-purple-300"],
+        html.light-theme [class~="text-purple-400"] {
+            color: #7e22ce;
+        }
+        html.light-theme [class~="text-red-300"],
+        html.light-theme [class~="text-red-400"] {
+            color: #b91c1c;
+        }
+        html.light-theme [class*="hover:bg-slate-800"]:hover {
+            background-color: #e8edf2;
         }
         .glow-accent {
             box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.25);
@@ -105,6 +183,10 @@
                     <a href="https://drive.google.com/file/d/1MVhywZZbEjEFEkP6eEDy8A3-Pez3IwT_/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-brand-accent/10 text-brand-accent border border-brand-accent/30 hover:bg-brand-accent hover:text-black transition-all duration-200 shadow-sm">
                         <i class="fa-solid fa-file-pdf"></i> Resume
                     </a>
+                    <button id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Switch to light theme" title="Switch to light theme" class="inline-flex items-center gap-2 p-2 sm:px-3 sm:py-1.5 rounded-lg bg-brand-card border border-brand-border text-slate-300 hover:text-brand-accent transition">
+                        <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
+                        <span id="themeToggleLabel" class="hidden sm:inline text-xs font-semibold">Light</span>
+                    </button>
                     <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg bg-brand-card border border-brand-border text-slate-300 hover:text-white hover:border-slate-600 transition">
                         <i class="fa-solid fa-bars text-base"></i>
                     </button>
@@ -275,7 +357,7 @@
                         <div class="relative bg-brand-card p-4 rounded-2xl border border-brand-border text-center space-y-4">
                             <!-- Image Container -->
                             <div class="overflow-hidden rounded-xl bg-brand-dark border border-brand-border aspect-square flex items-center justify-center relative">
-                                <img src="https://lh3.googleusercontent.com/d/1Gec24mjkxrve5KbR7Qww7tBVmfiT_zSI" alt="Mark Jayson Santos - Headshot" class="w-full h-full object-cover hover:scale-105 transition duration-500" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1Gec24mjkxrve5KbR7Qww7tBVmfiT_zSI';">
+                                <img src="assets/images/main_pic.png" alt="Mark Jayson Santos - Headshot" class="w-full h-full object-cover hover:scale-105 transition duration-500" onerror="this.onerror=null; this.src='https://drive.google.com/uc?export=view&id=1Gec24mjkxrve5KbR7Qww7tBVmfiT_zSI';">
                                 <div class="absolute bottom-2 left-2 right-2 px-3 py-1 bg-brand-dark/80 backdrop-blur-md rounded border border-brand-border text-[11px] font-mono text-brand-accent">
                                     Mark Jayson Santos • Senior QC Analyst
                                 </div>
@@ -1394,6 +1476,56 @@
     </footer>
 
     <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeToggleIcon = document.getElementById('themeToggleIcon');
+        const themeToggleLabel = document.getElementById('themeToggleLabel');
+        let portfolioCharts = [];
+
+        function updateThemeControl(isLight) {
+            document.documentElement.classList.toggle('light-theme', isLight);
+            themeToggle.setAttribute('aria-checked', String(isLight));
+            themeToggle.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} theme`);
+            themeToggle.title = `Switch to ${isLight ? 'dark' : 'light'} theme`;
+            themeToggleIcon.className = `fa-solid ${isLight ? 'fa-moon' : 'fa-sun'}`;
+            themeToggleLabel.textContent = isLight ? 'Dark' : 'Light';
+
+            try {
+                localStorage.setItem('portfolio-theme', isLight ? 'light' : 'dark');
+            } catch (error) {
+                // The selected theme remains active for this page view.
+            }
+
+            updatePortfolioChartTheme(isLight);
+        }
+
+        function updatePortfolioChartTheme(isLight) {
+            const textColor = isLight ? '#64748b' : '#94a3b8';
+            const gridColor = isLight ? 'rgba(148, 163, 184, 0.25)' : 'rgba(255, 255, 255, 0.05)';
+
+            portfolioCharts.forEach(chart => {
+                if (chart.options.plugins.legend.labels) {
+                    chart.options.plugins.legend.labels.color = textColor;
+                }
+
+                Object.values(chart.options.scales).forEach(scale => {
+                    scale.ticks.color = textColor;
+                    scale.grid.color = gridColor;
+                });
+
+                if (chart.data.datasets[0]?.label === 'Audit Volume') {
+                    chart.data.datasets[0].backgroundColor = isLight ? 'rgba(148, 163, 184, 0.55)' : 'rgba(36, 42, 61, 0.8)';
+                    chart.data.datasets[0].borderColor = isLight ? '#94a3b8' : '#242a3d';
+                }
+
+                chart.update('none');
+            });
+        }
+
+        themeToggle.addEventListener('click', () => {
+            updateThemeControl(!document.documentElement.classList.contains('light-theme'));
+        });
+        updateThemeControl(document.documentElement.classList.contains('light-theme'));
+
         /* Mobile Menu Toggle Logic */
         const mobileBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -1413,7 +1545,7 @@
         window.onload = function() {
             // 1. Mini Hero Chart
             const heroCtx = document.getElementById('heroMiniChart').getContext('2d');
-            new Chart(heroCtx, {
+            portfolioCharts.push(new Chart(heroCtx, {
                 type: 'line',
                 data: {
                     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -1436,11 +1568,11 @@
                         y: { min: 95, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 9 } } }
                     }
                 }
-            });
+            }));
 
             // 2. Main QC Analytics Dashboard Chart
             const qcCtx = document.getElementById('qcMainDashboardChart').getContext('2d');
-            new Chart(qcCtx, {
+            portfolioCharts.push(new Chart(qcCtx, {
                 type: 'bar',
                 data: {
                     labels: ['Dept A (Property)', 'Dept B (Casualty)', 'Dept C (Cat Exposure)', 'Dept D (Claims)', 'Dept E (Operations)'],
@@ -1486,7 +1618,8 @@
                         }
                     }
                 }
-            });
+            }));
+            updatePortfolioChartTheme(document.documentElement.classList.contains('light-theme'));
         };
 
         /* Form Submission Logic */
