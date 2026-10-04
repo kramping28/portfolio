@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overall Dashboard - QA Team</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -26,769 +22,259 @@
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
-        body {
-            background-color: #050507;
-            color: #ffffff;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        /* Custom scrollbar styling for tables */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #121215;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #27272a;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3f3f46;
-        }
-        .table-stripe tr:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-        .table-stripe tr:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
+        body { background: #08080a; color: #f3f4f6; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+        .table-stripe tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.025); }
+        .table-stripe tbody tr:hover { background: rgba(255, 255, 255, 0.06); }
+        .dashboard-card { min-width: 0; }
+        .chart-frame { position: relative; width: 100%; min-width: 0; }
+        .chart-frame canvas { display: block; max-width: 100%; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #121215; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
     </style>
 </head>
-<body class="p-3 md:p-5 min-h-screen">
-    <div class="max-w-[1800px] mx-auto space-y-4">
-        
-        <!-- Header & Top Filters -->
-        <header class="bg-cardBg border border-cardBorder rounded-xl p-4 shadow-lg">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+<body class="min-h-screen p-3 md:p-5">
+    <main class="mx-auto max-w-[1800px] space-y-4">
+        <header class="rounded-xl border border-cardBorder bg-cardBg p-4 shadow-lg">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                        Overall Dashboard
-                    </h1>
-                    <p class="text-xs font-semibold text-gray-400 tracking-wider uppercase mt-0.5">QA TEAM</p>
+                    <h1 class="flex items-center gap-3 text-2xl font-extrabold text-white md:text-3xl">Overall Dashboard</h1>
+                    <p class="mt-1 text-xs font-semibold uppercase tracking-wider text-gray-400">QA Team</p>
                 </div>
-
-                <!-- Global Filters -->
-                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                    <!-- Team Filter -->
-                    <div class="flex items-center gap-2 bg-black/40 border border-cardBorder px-3 py-1.5 rounded-lg text-sm">
-                        <label class="text-gray-400 font-medium text-xs">Team</label>
-                        <select id="teamFilter" onchange="updateDashboardData()" class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer">
-                            <option value="All" class="bg-cardBg">All</option>
-                            <option value="A" class="bg-cardBg">Team A</option>
-                            <option value="B" class="bg-cardBg">Team B</option>
-                            <option value="C" class="bg-cardBg">Team C</option>
-                            <option value="D" class="bg-cardBg">Team D</option>
+                <div class="flex flex-wrap items-center gap-2">
+                    <label class="flex items-center gap-2 rounded-lg border border-cardBorder bg-black/40 px-3 py-2 text-xs text-gray-400">
+                        Team
+                        <select id="teamFilter" class="bg-transparent font-semibold text-white focus:outline-none">
+                            <option value="All">All</option><option value="A">Team A</option><option value="B">Team B</option><option value="C">Team C</option><option value="D">Team D</option>
                         </select>
-                    </div>
-
-                    <!-- Day Range -->
-                    <div class="flex items-center gap-1.5 bg-black/40 border border-cardBorder px-3 py-1.5 rounded-lg text-sm">
-                        <label class="text-gray-400 font-medium text-xs">Day</label>
-                        <input type="number" min="1" max="31" value="1" class="w-10 bg-black/60 border border-gray-700 rounded px-1.5 text-center text-white text-xs font-bold focus:outline-none focus:border-accentBlue">
-                        <span class="text-gray-500 text-xs">to</span>
-                        <input type="number" min="1" max="31" value="31" class="w-10 bg-black/60 border border-gray-700 rounded px-1.5 text-center text-white text-xs font-bold focus:outline-none focus:border-accentBlue">
-                    </div>
-
-                    <!-- Week Filter -->
-                    <div class="flex items-center gap-2 bg-black/40 border border-cardBorder px-3 py-1.5 rounded-lg text-sm">
-                        <label class="text-gray-400 font-medium text-xs">Week</label>
-                        <select id="weekFilter" onchange="updateDashboardData()" class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer">
-                            <option value="All" class="bg-cardBg">All</option>
-                            <option value="Week 1" class="bg-cardBg">Week 1</option>
-                            <option value="Week 2" class="bg-cardBg">Week 2</option>
-                            <option value="Week 3" class="bg-cardBg">Week 3</option>
-                            <option value="Week 4" class="bg-cardBg">Week 4</option>
-                            <option value="Week 5" class="bg-cardBg">Week 5</option>
+                    </label>
+                    <label class="flex items-center gap-2 rounded-lg border border-cardBorder bg-black/40 px-3 py-2 text-xs text-gray-400">
+                        Days
+                        <input id="dayStart" type="number" min="1" max="31" value="1" aria-label="Start day" class="w-12 rounded border border-gray-700 bg-black/60 px-1 py-1 text-center font-bold text-white">
+                        <span>to</span>
+                        <input id="dayEnd" type="number" min="1" max="31" value="31" aria-label="End day" class="w-12 rounded border border-gray-700 bg-black/60 px-1 py-1 text-center font-bold text-white">
+                    </label>
+                    <label class="flex items-center gap-2 rounded-lg border border-cardBorder bg-black/40 px-3 py-2 text-xs text-gray-400">
+                        Week
+                        <select id="weekFilter" class="bg-transparent font-semibold text-white focus:outline-none">
+                            <option value="All">All</option><option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option><option value="4">Week 4</option><option value="5">Week 5</option>
                         </select>
-                    </div>
-
-                    <!-- Year Filter -->
-                    <div class="flex items-center gap-2 bg-black/40 border border-cardBorder px-3 py-1.5 rounded-lg text-sm">
-                        <label class="text-gray-400 font-medium text-xs">Year</label>
-                        <select class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer">
-                            <option value="2026" class="bg-cardBg">2026</option>
-                            <option value="2025" class="bg-cardBg">2025</option>
+                    </label>
+                    <label class="flex items-center gap-2 rounded-lg border border-cardBorder bg-black/40 px-3 py-2 text-xs text-gray-400">
+                        Year
+                        <select id="yearFilter" class="bg-transparent font-semibold text-white focus:outline-none">
+                            <option value="2026" selected>2026</option><option value="2025">2025</option>
                         </select>
-                    </div>
-
-                    <!-- Reset / Action Button -->
-                    <button onclick="resetFilters()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                        <i class="fa-solid fa-rotate-right mr-1"></i> Reset
+                    </label>
+                    <button id="resetFilters" type="button" class="rounded-lg border border-blue-500/30 bg-blue-600/20 px-3 py-2 text-xs font-semibold text-blue-300 transition hover:bg-blue-600/30">
+                        <i class="fa-solid fa-rotate-right mr-1" aria-hidden="true"></i>Reset
                     </button>
                 </div>
             </div>
-
-            <!-- Month Pills Navigation -->
-            <div class="mt-4 pt-3 border-t border-cardBorder/60 flex items-center gap-1.5 overflow-x-auto pb-1">
-                <button onclick="selectMonth(this, 'Jan')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-white text-black transition">Jan</button>
-                <button onclick="selectMonth(this, 'Feb')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Feb</button>
-                <button onclick="selectMonth(this, 'Mar')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Mar</button>
-                <button onclick="selectMonth(this, 'Apr')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Apr</button>
-                <button onclick="selectMonth(this, 'May')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">May</button>
-                <button onclick="selectMonth(this, 'Jun')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Jun</button>
-                <button onclick="selectMonth(this, 'Jul')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Jul</button>
-                <button onclick="selectMonth(this, 'Aug')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Aug</button>
-                <button onclick="selectMonth(this, 'Sep')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Sep</button>
-                <button onclick="selectMonth(this, 'Oct')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Oct</button>
-                <button onclick="selectMonth(this, 'Nov')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Nov</button>
-                <button onclick="selectMonth(this, 'Dec')" class="month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition">Dec</button>
-            </div>
+            <nav aria-label="Select month" class="mt-4 flex items-center gap-1.5 overflow-x-auto border-t border-cardBorder/60 pt-3 pb-1">
+                <button type="button" data-month="Jan" class="month-button rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-black">Jan</button>
+                <button type="button" data-month="Feb" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Feb</button>
+                <button type="button" data-month="Mar" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Mar</button>
+                <button type="button" data-month="Apr" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Apr</button>
+                <button type="button" data-month="May" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">May</button>
+                <button type="button" data-month="Jun" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Jun</button>
+                <button type="button" data-month="Jul" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Jul</button>
+                <button type="button" data-month="Aug" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Aug</button>
+                <button type="button" data-month="Sep" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Sep</button>
+                <button type="button" data-month="Oct" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Oct</button>
+                <button type="button" data-month="Nov" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Nov</button>
+                <button type="button" data-month="Dec" class="month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800">Dec</button>
+            </nav>
         </header>
 
-        <!-- Main Dashboard Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <section aria-label="Quality overview" class="grid grid-cols-1 gap-4 xl:grid-cols-12">
+            <article class="dashboard-card flex min-h-[360px] flex-col rounded-xl border border-cardBorder bg-cardBg p-4 shadow-lg xl:col-span-5">
+                <div class="mb-2 flex items-center justify-between gap-3">
+                    <h2 class="text-sm font-bold uppercase tracking-wide text-gray-200">Monthly Quality Assurance &amp; Error Trend</h2>
+                    <span id="trendRange" class="whitespace-nowrap rounded border border-cardBorder bg-black/40 px-2 py-1 text-xs text-gray-400">Jan - Jun</span>
+                </div>
+                <div class="chart-frame min-h-[280px] flex-1"><canvas id="trendChart" aria-label="Monthly QA and error trend"></canvas></div>
+                <div class="mt-2 flex justify-center gap-6 text-xs font-medium text-gray-300">
+                    <span><i class="mr-2 inline-block h-3 w-3 rounded-full bg-blue-500"></i>Total QA</span>
+                    <span><i class="mr-2 inline-block h-3 w-3 rounded-full bg-red-500"></i>Total Error</span>
+                </div>
+            </article>
 
-            <!-- UPPER SECTION LEFT: Monthly Trend Line Chart (5 cols) -->
-            <div class="lg:col-span-6 xl:col-span-5 bg-cardBg border border-cardBorder rounded-xl p-4 flex flex-col justify-between shadow-lg min-h-[380px]">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-sm font-bold text-gray-200 uppercase tracking-wide">Monthly Quality Assurance & Error Trend</h2>
-                    <span class="text-xs text-gray-400 bg-black/40 px-2 py-0.5 rounded border border-cardBorder">Jan - Jun</span>
+            <div class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:col-span-7">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 md:col-span-2">
+                    <article class="dashboard-card rounded-xl border border-l-4 border-cardBorder border-l-green-500 bg-cardBg p-3.5 shadow-md">
+                        <p class="text-xs font-bold uppercase text-gray-400">Scrub Total</p><p id="scrubPct" class="mt-1 text-2xl font-extrabold text-white">79.82%</p>
+                        <div class="mt-3 flex justify-between border-t border-cardBorder/60 pt-2 text-xs"><span>Total: <b id="scrubTotal" class="text-green-400">1,368</b></span><span>Error: <b id="scrubError" class="text-green-400">276</b></span></div>
+                    </article>
+                    <article class="dashboard-card rounded-xl border border-l-4 border-cardBorder border-l-yellow-500 bg-cardBg p-3.5 shadow-md">
+                        <p class="text-xs font-bold uppercase text-gray-400">Model Total</p><p id="modelPct" class="mt-1 text-2xl font-extrabold text-white">88.57%</p>
+                        <div class="mt-3 flex justify-between border-t border-cardBorder/60 pt-2 text-xs"><span>Total: <b id="modelTotal" class="text-yellow-400">1,873</b></span><span>Error: <b id="modelError" class="text-yellow-400">214</b></span></div>
+                    </article>
+                    <article class="dashboard-card rounded-xl border border-l-4 border-cardBorder border-l-red-500 bg-cardBg p-3.5 shadow-md">
+                        <p class="text-xs font-bold uppercase text-gray-400">Overall</p><p id="overallPct" class="mt-1 text-2xl font-extrabold text-white">84.88%</p>
+                        <div class="mt-3 flex justify-between border-t border-cardBorder/60 pt-2 text-xs"><span>Total QA: <b id="totalQA" class="text-red-400">3,241</b></span><span>Error: <b id="totalError" class="text-red-400">490</b></span></div>
+                    </article>
                 </div>
-                <div class="relative flex-grow h-[290px] w-full">
-                    <canvas id="trendChart"></canvas>
-                </div>
-                <div class="flex justify-center items-center gap-6 mt-2 text-xs font-medium">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span>
-                        <span class="text-gray-300">Total QA</span>
+                <article class="dashboard-card rounded-xl border border-cardBorder bg-cardBg p-3 shadow-md">
+                    <h3 class="mb-2 rounded-t bg-black/40 py-1 text-center text-xs font-bold text-gray-200">Top 5 Scrub - Current / Previous</h3>
+                    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                        <div><h4 class="mb-1 text-xs font-semibold text-green-300">Current</h4><div class="overflow-x-auto"><table class="table-stripe w-full text-left text-xs"><thead class="text-gray-400"><tr><th class="py-1">Analyst</th><th class="py-1 text-right">QA</th><th class="py-1 text-right">Error</th></tr></thead><tbody id="scrubCurrentRows"></tbody></table></div></div>
+                        <div><h4 class="mb-1 text-xs font-semibold text-gray-300">Previous</h4><div class="overflow-x-auto"><table class="table-stripe w-full text-left text-xs"><thead class="text-gray-400"><tr><th class="py-1">Analyst</th><th class="py-1 text-right">QA</th><th class="py-1 text-right">Error</th></tr></thead><tbody id="scrubPreviousRows"></tbody></table></div></div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
-                        <span class="text-gray-300">Total Error</span>
+                </article>
+                <article class="dashboard-card rounded-xl border border-cardBorder bg-cardBg p-3 shadow-md">
+                    <h3 class="mb-2 rounded-t bg-black/40 py-1 text-center text-xs font-bold text-yellow-300">Top 5 Model - Current / Previous</h3>
+                    <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                        <div><h4 class="mb-1 text-xs font-semibold text-yellow-300">Current</h4><div class="overflow-x-auto"><table class="table-stripe w-full text-left text-xs"><thead class="text-gray-400"><tr><th class="py-1">Analyst</th><th class="py-1 text-right">QA</th><th class="py-1 text-right">Error</th></tr></thead><tbody id="modelCurrentRows"></tbody></table></div></div>
+                        <div><h4 class="mb-1 text-xs font-semibold text-gray-300">Previous</h4><div class="overflow-x-auto"><table class="table-stripe w-full text-left text-xs"><thead class="text-gray-400"><tr><th class="py-1">Analyst</th><th class="py-1 text-right">QA</th><th class="py-1 text-right">Error</th></tr></thead><tbody id="modelPreviousRows"></tbody></table></div></div>
                     </div>
-                </div>
+                </article>
             </div>
+        </section>
 
-            <!-- UPPER SECTION RIGHT: Top KPI Metric Cards & Top 5 Tables (7 cols) -->
-            <div class="lg:col-span-6 xl:col-span-7 space-y-4">
-                
-                <!-- 3 Top Metric Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <!-- Scrub Card -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-md border-l-4 border-l-green-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Scrub Total</p>
-                                <h3 id="scrubPct" class="text-2xl font-extrabold text-white mt-1">79.82%</h3>
-                            </div>
-                            <div class="p-2 rounded-lg bg-green-500/10 text-green-400">
-                                <i class="fa-solid fa-sliders text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-cardBorder/60 flex justify-between text-xs">
-                            <div>
-                                <span class="text-gray-400">Scrub Total:</span>
-                                <span id="scrubTotalVal" class="font-bold text-green-400 ml-1">1,368</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-400">Scrub Error:</span>
-                                <span id="scrubErrVal" class="font-bold text-green-400 ml-1">276</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Model Card -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-md border-l-4 border-l-yellow-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Model Total</p>
-                                <h3 id="modelPct" class="text-2xl font-extrabold text-white mt-1">88.57%</h3>
-                            </div>
-                            <div class="p-2 rounded-lg bg-yellow-500/10 text-yellow-400">
-                                <i class="fa-solid fa-cube text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-cardBorder/60 flex justify-between text-xs">
-                            <div>
-                                <span class="text-gray-400">Model Total:</span>
-                                <span id="modelTotalVal" class="font-bold text-yellow-400 ml-1">1,873</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-400">Model Error:</span>
-                                <span id="modelErrVal" class="font-bold text-yellow-400 ml-1">214</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Overall % Card -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-md border-l-4 border-l-red-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase">Overall %</p>
-                                <h3 id="overallPct" class="text-2xl font-extrabold text-white mt-1">84.88%</h3>
-                            </div>
-                            <div class="p-2 rounded-lg bg-red-500/10 text-red-400">
-                                <i class="fa-solid fa-circle-exclamation text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-cardBorder/60 flex justify-between text-xs">
-                            <div>
-                                <span class="text-gray-400">Total QA:</span>
-                                <span id="totalQaVal" class="font-bold text-red-400 ml-1">3,241</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-400">Total Error:</span>
-                                <span id="totalErrVal" class="font-bold text-red-400 ml-1">490</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Top 5 Scrub (Current vs Previous) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Top 5 Scrub Current -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3 shadow-md">
-                        <div class="text-center py-1 bg-black/40 border-b border-cardBorder rounded-t-lg mb-2">
-                            <h3 class="text-xs font-bold text-gray-200">Top 5 Scrub Current</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-left table-stripe">
-                                <thead>
-                                    <tr class="text-gray-400 border-b border-cardBorder/60">
-                                        <th class="py-1.5 px-2">Analyst Code Name</th>
-                                        <th class="py-1.5 px-2 text-center">Total QA</th>
-                                        <th class="py-1.5 px-2 text-right">Total Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="topScrubCurrentBody" class="divide-y divide-cardBorder/30 font-medium">
-                                    <!-- Populated dynamically JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Top 5 Scrub Previous -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3 shadow-md">
-                        <div class="text-center py-1 bg-black/40 border-b border-cardBorder rounded-t-lg mb-2">
-                            <h3 class="text-xs font-bold text-gray-200">Top 5 Scrub Previous</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-left table-stripe">
-                                <thead>
-                                    <tr class="text-gray-400 border-b border-cardBorder/60">
-                                        <th class="py-1.5 px-2">Analyst Code Name</th>
-                                        <th class="py-1.5 px-2 text-center">Total QA</th>
-                                        <th class="py-1.5 px-2 text-right">Total Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="topScrubPreviousBody" class="divide-y divide-cardBorder/30 font-medium">
-                                    <!-- Populated dynamically JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Top 5 Model (Current vs Previous) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Top 5 Model Current -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3 shadow-md">
-                        <div class="text-center py-1 bg-black/40 border-b border-cardBorder rounded-t-lg mb-2">
-                            <h3 class="text-xs font-bold text-yellow-400">Top 5 Model Current</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-left table-stripe">
-                                <thead>
-                                    <tr class="text-gray-400 border-b border-cardBorder/60">
-                                        <th class="py-1.5 px-2">Analyst Code Name</th>
-                                        <th class="py-1.5 px-2 text-center">Total QA</th>
-                                        <th class="py-1.5 px-2 text-right">Total Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="topModelCurrentBody" class="divide-y divide-cardBorder/30 font-medium">
-                                    <!-- Populated dynamically JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Top 5 Model Previous -->
-                    <div class="bg-cardBg border border-cardBorder rounded-xl p-3 shadow-md">
-                        <div class="text-center py-1 bg-black/40 border-b border-cardBorder rounded-t-lg mb-2">
-                            <h3 class="text-xs font-bold text-yellow-400">Top 5 Model Previous</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-left table-stripe">
-                                <thead>
-                                    <tr class="text-gray-400 border-b border-cardBorder/60">
-                                        <th class="py-1.5 px-2">Analyst Code Name</th>
-                                        <th class="py-1.5 px-2 text-center">Total QA</th>
-                                        <th class="py-1.5 px-2 text-right">Total Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="topModelPreviousBody" class="divide-y divide-cardBorder/30 font-medium">
-                                    <!-- Populated dynamically JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
+        <section aria-label="Team details" class="grid grid-cols-1 gap-4 xl:grid-cols-12">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:col-span-4 xl:grid-cols-1">
+                <article class="dashboard-card rounded-xl border border-cardBorder bg-cardBg p-3.5 shadow-lg">
+                    <h2 class="mb-2 text-center text-xs font-bold uppercase tracking-wider text-gray-200">Total Accuracy per Team</h2>
+                    <div class="chart-frame h-[190px]"><canvas id="accuracyChart" aria-label="Accuracy percentage by team"></canvas></div>
+                </article>
+                <article class="dashboard-card rounded-xl border border-cardBorder bg-cardBg p-3.5 shadow-lg">
+                    <h2 class="mb-2 text-center text-xs font-bold uppercase tracking-wider text-gray-200">Total per Week</h2>
+                    <div class="chart-frame h-[190px]"><canvas id="weeklyChart" aria-label="QA and errors per week"></canvas></div>
+                </article>
             </div>
-        </div>
-        
-        <!-- LOWER SECTION: Accuracy Chart, Weekly Chart, Team Members Table, Top Parameters Error -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <article class="dashboard-card flex max-h-[420px] flex-col rounded-xl border border-cardBorder bg-cardBg p-3.5 shadow-lg xl:col-span-4">
+                <h2 class="mb-2 rounded-t bg-black/40 py-1 text-center text-xs font-bold uppercase tracking-wider text-gray-200">Team Members</h2>
+                <div class="flex-1 overflow-y-auto"><table class="table-stripe w-full text-left text-xs"><thead class="sticky top-0 bg-cardBg text-gray-400"><tr><th class="py-1.5 px-2">Analyst</th><th class="py-1.5 px-2 text-right">Total Error</th></tr></thead><tbody id="teamRows"></tbody></table></div>
+                <div class="mt-2 flex justify-between rounded border-t border-cardBorder pt-2 px-2 text-xs font-bold"><span>Total</span><span id="teamErrorTotal" class="text-red-400">490</span></div>
+            </article>
+            <article class="dashboard-card flex max-h-[420px] flex-col rounded-xl border border-cardBorder bg-cardBg p-3.5 shadow-lg xl:col-span-4">
+                <h2 class="mb-2 rounded-t bg-black/40 py-1 text-center text-xs font-bold uppercase tracking-wider text-gray-200">Top Parameters Error</h2>
+                <div class="flex-1 overflow-y-auto"><table class="table-stripe w-full text-left text-xs"><thead class="sticky top-0 bg-cardBg text-gray-400"><tr><th class="py-1.5 px-2">Parameter</th><th class="py-1.5 px-2 text-center">Work Type</th><th class="py-1.5 px-2 text-right">Errors</th></tr></thead><tbody id="parameterRows"></tbody></table></div>
+                <p class="mt-2 border-t border-cardBorder pt-2 text-right text-[10px] text-gray-500">* Categorized by Work Type 1, 2, 3, 4</p>
+            </article>
+        </section>
 
-            <!-- BOTTOM LEFT: Accuracy per Team & Total per Week (4 cols) -->
-            <div class="lg:col-span-4 space-y-4 flex flex-col">
-                <!-- Total Accuracy per Team Chart -->
-                <div class="bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-lg flex-1">
-                    <h2 class="text-xs font-bold text-center text-gray-200 uppercase tracking-wider mb-2">Total Accuracy per Team</h2>
-                    <div class="h-[150px] w-full relative">
-                        <canvas id="accuracyChart"></canvas>
-                    </div>
-                </div>
+        <footer class="space-y-1 border-t border-[#232631] pt-4 text-center text-xs text-gray-400">
+            <p class="font-medium text-gray-300">&copy; 2026 Mark Jayson Santos. Senior Quality Control Analyst Portfolio.</p>
+            <p class="text-[11px] text-gray-500">Sample data and projects for demonstration purposes. All confidential company metrics remain protected.</p>
+        </footer>
+    </main>
 
-                <!-- Total per Week Chart -->
-                <div class="bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-lg flex-1">
-                    <h2 class="text-xs font-bold text-center text-gray-200 uppercase tracking-wider mb-2">Total per Week</h2>
-                    <div class="h-[150px] w-full relative">
-                        <canvas id="weeklyChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BOTTOM CENTER: Team Members Table (4 cols) -->
-            <div class="lg:col-span-4 bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-lg flex flex-col justify-between max-h-[360px]">
-                <div class="text-center py-1 bg-black/40 border-b border-cardBorder rounded-t-lg mb-2">
-                    <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider">Team Members</h2>
-                </div>
-                <div class="overflow-y-auto flex-1 pr-1">
-                    <table class="w-full text-xs text-left table-stripe">
-                        <thead class="sticky top-0 bg-cardBg text-gray-400 border-b border-cardBorder">
-                            <tr>
-                                <th class="py-1.5 px-2">Analyst Code Name</th>
-                                <th class="py-1.5 px-2 text-right">Total Error</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teamMembersBody" class="divide-y divide-cardBorder/30">
-                            <!-- Populated dynamically JS -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-2 pt-2 border-t border-cardBorder font-bold text-xs flex justify-between px-2 bg-black/30 rounded">
-                    <span class="text-gray-300">Total</span>
-                    <span id="teamMembersTotalErr" class="text-red-400">490</span>
-                </div>
-            </div>
-
-            <!-- BOTTOM RIGHT: Top 5 Parameters Error Table (4 cols) -->
-            <div class="lg:col-span-4 bg-cardBg border border-cardBorder rounded-xl p-3.5 shadow-lg flex flex-col justify-between max-h-[360px]">
-                <div class="text-center py-1 bg-black/40 border-b border-cardBorder rounded-t-lg mb-2">
-                    <h2 class="text-xs font-bold text-gray-200 uppercase tracking-wider">Top Parameters Error</h2>
-                </div>
-                <div class="overflow-y-auto flex-1 pr-1">
-                    <table class="w-full text-xs text-left table-stripe">
-                        <thead class="sticky top-0 bg-cardBg text-gray-400 border-b border-cardBorder">
-                            <tr>
-                                <th class="py-1.5 px-2">Parameter</th>
-                                <th class="py-1.5 px-2 text-center">Work Type</th>
-                                <th class="py-1.5 px-2 text-right">Error Count</th>
-                            </tr>
-                        </thead>
-                        <tbody id="parametersErrorBody" class="divide-y divide-cardBorder/30">
-                            <!-- Populated dynamically JS -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-2 pt-2 border-t border-cardBorder/40 text-[10px] text-gray-500 text-right">
-                    <span>* Categorized by Work Type 1, 2, 3, 4</span>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- JavaScript Data Logic & Charts Initialization -->
     <script>
-        
-        // Mock dataset matching image baseline
         const baseData = {
-            monthlyTrend: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                totalQA: [227, 277, 290, 799, 664, 984],
-                totalError: [47, 63, 41, 42, 130, 167]
-            },
-            kpis: {
-                scrubPct: "79.82%",
-                scrubTotal: "1,368",
-                scrubErr: "276",
-                modelPct: "88.57%",
-                modelTotal: "1,873",
-                modelErr: "214",
-                overallPct: "84.88%",
-                totalQA: "3,241",
-                totalErr: "490"
-            },
-            topScrubCurrent: [
-                { name: "Analyst 30", qa: 78, err: 36 },
-                { name: "Analyst 1", qa: 93, err: 25 },
-                { name: "Analyst 13", qa: 91, err: 25 },
-                { name: "Analyst 12", qa: 72, err: 21 },
-                { name: "Analyst 15", qa: 57, err: 20 },
-                { name: "Analyst 27", qa: 81, err: 20 }
-            ],
-            topScrubPrevious: [
-                { name: "Analyst 15", qa: 6, err: 4 },
-                { name: "Analyst 31", qa: 6, err: 4 },
-                { name: "Analyst 13", qa: 7, err: 3 },
-                { name: "Analyst 26", qa: 10, err: 3 },
-                { name: "Analyst 24", qa: 4, err: 2 },
-                { name: "Analyst 30", qa: 10, err: 2 }
-            ],
-            topModelCurrent: [
-                { name: "Analyst 15", qa: 75, err: 23 },
-                { name: "Analyst 22", qa: 89, err: 19 },
-                { name: "Analyst 31", qa: 110, err: 17 },
-                { name: "Analyst 11", qa: 67, err: 12 },
-                { name: "Analyst 4", qa: 48, err: 10 },
-                { name: "Analyst 10", qa: 95, err: 8 },
-                { name: "Analyst 3", qa: 63, err: 8 }
-            ],
-            topModelPrevious: [
-                { name: "Analyst 12", qa: 16, err: 14 },
-                { name: "Analyst 20", qa: 8, err: 5 },
-                { name: "Analyst 11", qa: 9, err: 4 },
-                { name: "Analyst 22", qa: 6, err: 4 },
-                { name: "Analyst 31", qa: 9, err: 3 }
-            ],
-            teamAccuracy: {
-                labels: ['A', 'B', 'C', 'D'],
-                values: [81.92, 82.70, 86.67, 89.18]
-            },
-            weekly: {
-                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
-                qa: [452, 574, 840, 956, 419],
-                err: [88, 100, 99, 147, 56]
-            },
-            teamMembers: [
-                { name: "Analyst 15", err: 43 },
-                { name: "Analyst 13", err: 40 },
-                { name: "Analyst 30", err: 38 },
-                { name: "Analyst 22", err: 36 },
-                { name: "Analyst 12", err: 34 },
-                { name: "Analyst 1", err: 33 },
-                { name: "Analyst 27", err: 29 },
-                { name: "Analyst 31", err: 29 },
-                { name: "Analyst 11", err: 25 },
-                { name: "Analyst 19", err: 23 },
-                { name: "Analyst 26", err: 20 },
-                { name: "Analyst 4", err: 20 },
-                { name: "Analyst 6", err: 20 },
-                { name: "Analyst 10", err: 13 },
-                { name: "Analyst 3", err: 13 },
-                { name: "Analyst 16", err: 11 },
-                { name: "Analyst 20", err: 11 },
-                { name: "Analyst 23", err: 10 }
-            ],
-            // Renamed parameters to Parameter 1..7 and Work Types to Work Type 1..4
-            topParametersError: [
-                { param: "Parameter 1", workType: "Work Type 1", count: 57 },
-                { param: "Parameter 2", workType: "Work Type 2", count: 40 },
-                { param: "Parameter 3", workType: "Work Type 3", count: 20 },
-                { param: "Parameter 4", workType: "Work Type 4", count: 20 },
-                { param: "Parameter 5", workType: "Work Type 2", count: 19 },
-                { param: "Parameter 6", workType: "Work Type 3", count: 13 },
-                { param: "Parameter 7", workType: "Work Type 1", count: 6 }
-            ]
+            monthlyTrend: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], totalQA: [227, 277, 290, 799, 664, 984], totalError: [47, 63, 41, 42, 130, 167] },
+            scrub: { total: 1368, errors: 276, current: [{name:'Analyst 30',qa:78,err:36},{name:'Analyst 1',qa:93,err:25},{name:'Analyst 13',qa:91,err:25},{name:'Analyst 12',qa:72,err:21},{name:'Analyst 15',qa:57,err:20},{name:'Analyst 27',qa:81,err:20}], previous: [{name:'Analyst 15',qa:6,err:4},{name:'Analyst 31',qa:6,err:4},{name:'Analyst 13',qa:7,err:3},{name:'Analyst 26',qa:10,err:3},{name:'Analyst 24',qa:4,err:2},{name:'Analyst 30',qa:10,err:2}] },
+            model: { total: 1873, errors: 214, current: [{name:'Analyst 15',qa:75,err:23},{name:'Analyst 22',qa:89,err:19},{name:'Analyst 31',qa:110,err:17},{name:'Analyst 11',qa:67,err:12},{name:'Analyst 4',qa:48,err:10},{name:'Analyst 10',qa:95,err:8},{name:'Analyst 3',qa:63,err:8}], previous: [{name:'Analyst 12',qa:16,err:14},{name:'Analyst 20',qa:8,err:5},{name:'Analyst 11',qa:9,err:4},{name:'Analyst 22',qa:6,err:4},{name:'Analyst 31',qa:9,err:3}] },
+            accuracy: { labels: ['Team A','Team B','Team C','Team D'], values: [81.92,82.70,86.67,89.18] },
+            weekly: { labels: ['Week 1','Week 2','Week 3','Week 4','Week 5'], qa: [452,574,840,956,419], errors: [88,100,99,147,56] },
+            team: [{name:'Analyst 15',err:43},{name:'Analyst 13',err:40},{name:'Analyst 30',err:38},{name:'Analyst 22',err:36},{name:'Analyst 12',err:34},{name:'Analyst 1',err:33},{name:'Analyst 27',err:29},{name:'Analyst 31',err:29},{name:'Analyst 11',err:25},{name:'Analyst 19',err:23},{name:'Analyst 26',err:20},{name:'Analyst 4',err:20},{name:'Analyst 6',err:20},{name:'Analyst 10',err:13},{name:'Analyst 3',err:13},{name:'Analyst 16',err:11},{name:'Analyst 20',err:11},{name:'Analyst 23',err:10}],
+            parameters: [{param:'Parameter 1',workType:'Work Type 1',count:57},{param:'Parameter 2',workType:'Work Type 2',count:40},{param:'Parameter 3',workType:'Work Type 3',count:20},{param:'Parameter 4',workType:'Work Type 4',count:20},{param:'Parameter 5',workType:'Work Type 2',count:19},{param:'Parameter 6',workType:'Work Type 3',count:13},{param:'Parameter 7',workType:'Work Type 1',count:6}]
         };
+        const formatNumber = value => Math.round(value).toLocaleString();
+        const makeRows = (items, cells) => items.map(item => `<tr>${cells(item)}</tr>`).join('');
+        let selectedMonth = 'Jan';
+        let trendChart;
+        let accuracyChart;
+        let weeklyChart;
 
-        let trendChartInstance = null;
-        let accuracyChartInstance = null;
-        let weeklyChartInstance = null;
-
-        function renderTables(data) {
-            // Helper for simple table rows
-            const populateTable = (elementId, items, renderRow) => {
-                const tbody = document.getElementById(elementId);
-                tbody.innerHTML = items.map(renderRow).join('');
-            };
-
-            // Top 5 Scrub Current
-            populateTable('topScrubCurrentBody', data.topScrubCurrent, item => `
-                <tr>
-                    <td class="py-1 px-2 text-gray-200">${item.name}</td>
-                    <td class="py-1 px-2 text-center text-gray-300">${item.qa}</td>
-                    <td class="py-1 px-2 text-right font-bold text-gray-100">${item.err}</td>
-                </tr>
-            `);
-
-            // Top 5 Scrub Previous
-            populateTable('topScrubPreviousBody', data.topScrubPrevious, item => `
-                <tr>
-                    <td class="py-1 px-2 text-gray-200">${item.name}</td>
-                    <td class="py-1 px-2 text-center text-gray-300">${item.qa}</td>
-                    <td class="py-1 px-2 text-right font-bold text-gray-100">${item.err}</td>
-                </tr>
-            `);
-
-            // Top 5 Model Current
-            populateTable('topModelCurrentBody', data.topModelCurrent, item => `
-                <tr>
-                    <td class="py-1 px-2 text-gray-200">${item.name}</td>
-                    <td class="py-1 px-2 text-center text-gray-300">${item.qa}</td>
-                    <td class="py-1 px-2 text-right font-bold text-gray-100">${item.err}</td>
-                </tr>
-            `);
-
-            // Top 5 Model Previous
-            populateTable('topModelPreviousBody', data.topModelPrevious, item => `
-                <tr>
-                    <td class="py-1 px-2 text-gray-200">${item.name}</td>
-                    <td class="py-1 px-2 text-center text-gray-300">${item.qa}</td>
-                    <td class="py-1 px-2 text-right font-bold text-gray-100">${item.err}</td>
-                </tr>
-            `);
-
-            // Team Members
-            populateTable('teamMembersBody', data.teamMembers, item => `
-                <tr>
-                    <td class="py-1 px-2 text-gray-200">${item.name}</td>
-                    <td class="py-1 px-2 text-right font-bold text-gray-100">${item.err}</td>
-                </tr>
-            `);
-
-            // Top Parameters Error
-            populateTable('parametersErrorBody', data.topParametersError, item => `
-                <tr>
-                    <td class="py-1.5 px-2 text-gray-200 font-medium">${item.param}</td>
-                    <td class="py-1.5 px-2 text-center text-gray-400"><span class="bg-cardBorder px-1.5 py-0.5 rounded text-[10px]">${item.workType}</span></td>
-                    <td class="py-1.5 px-2 text-right font-bold text-red-400">${item.count}</td>
-                </tr>
-            `);
-        }
-
-        function initTrendChart(data) {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            if (trendChartInstance) trendChartInstance.destroy();
-
-            trendChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [
-                        {
-                            label: 'Total QA',
-                            data: data.totalQA,
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.15)',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            pointBackgroundColor: '#3b82f6'
-                        },
-                        {
-                            label: 'Total Error',
-                            data: data.totalError,
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            pointBackgroundColor: '#f87171'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: '#18181b',
-                            borderColor: '#27272a',
-                            borderWidth: 1,
-                            titleFont: { size: 12, weight: 'bold' }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#9ca3af', font: { size: 11, weight: 'bold' } }
-                        },
-                        y: {
-                            min: 0,
-                            max: 1000,
-                            grid: { color: 'rgba(255, 255, 255, 0.08)' },
-                            ticks: { color: '#9ca3af', stepSize: 200, font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        function initAccuracyChart(data) {
-            const ctx = document.getElementById('accuracyChart').getContext('2d');
-            if (accuracyChartInstance) accuracyChartInstance.destroy();
-
-            accuracyChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Accuracy %',
-                        data: data.values,
-                        backgroundColor: '#4b5563',
-                        hoverBackgroundColor: '#6b7280',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: { label: ctx => `${ctx.raw}%` },
-                            backgroundColor: '#18181b'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#d1d5db', font: { size: 11, weight: 'bold' } }
-                        },
-                        y: {
-                            min: 0,
-                            max: 100,
-                            ticks: {
-                                color: '#9ca3af',
-                                callback: value => value + '%',
-                                stepSize: 50,
-                                font: { size: 10 }
-                            },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function initWeeklyChart(data) {
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            if (weeklyChartInstance) weeklyChartInstance.destroy();
-
-            weeklyChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.labels,
-                    datasets: [
-                        {
-                            label: 'Total QA',
-                            data: data.qa,
-                            backgroundColor: '#2563eb',
-                            borderRadius: 3
-                        },
-                        {
-                            label: 'Total Error',
-                            data: data.err,
-                            backgroundColor: '#ef4444',
-                            borderRadius: 3
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { backgroundColor: '#18181b' }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af', font: { size: 10 } }
-                        },
-                        y: {
-                            min: 0,
-                            max: 1000,
-                            ticks: { color: '#9ca3af', stepSize: 500, font: { size: 10 } },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function selectMonth(button, month) {
-            // Update active button state
-            document.querySelectorAll('.month-btn').forEach(btn => {
-                btn.className = 'month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-black/50 border border-cardBorder text-gray-300 hover:bg-gray-800 transition';
-            });
-            button.className = 'month-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-white text-black transition';
-
-            updateDashboardData();
-        }
-
-        function updateDashboardData() {
-            const team = document.getElementById('teamFilter').value;
+        function selectedMultiplier() {
+            const teamScale = { All: 1, A: 0.85, B: 0.95, C: 1.1, D: 1.2 }[document.getElementById('teamFilter').value];
             const week = document.getElementById('weekFilter').value;
-
-            // Generate slight variations based on filter for dynamic feel
-            let multiplier = 1.0;
-            if (team === 'A') multiplier = 0.85;
-            if (team === 'B') multiplier = 0.95;
-            if (team === 'C') multiplier = 1.1;
-            if (team === 'D') multiplier = 1.2;
-
-            if (week !== 'All') multiplier *= 0.25;
-
-            // Update KPI values dynamically
-            const scrubTot = Math.round(1368 * multiplier);
-            const scrubErr = Math.round(276 * multiplier);
-            const modelTot = Math.round(1873 * multiplier);
-            const modelErr = Math.round(214 * multiplier);
-
-            document.getElementById('scrubTotalVal').innerText = scrubTot.toLocaleString();
-            document.getElementById('scrubErrVal').innerText = scrubErr.toLocaleString();
-            document.getElementById('modelTotalVal').innerText = modelTot.toLocaleString();
-            document.getElementById('modelErrVal').innerText = modelErr.toLocaleString();
-
-            const totalQA = scrubTot + modelTot;
-            const totalErr = scrubErr + modelErr;
-            document.getElementById('totalQaVal').innerText = totalQA.toLocaleString();
-            document.getElementById('totalErrVal').innerText = totalErr.toLocaleString();
-            document.getElementById('teamMembersTotalErr').innerText = totalErr.toLocaleString();
+            const start = Math.max(1, Math.min(31, Number(document.getElementById('dayStart').value) || 1));
+            const end = Math.max(start, Math.min(31, Number(document.getElementById('dayEnd').value) || 31));
+            document.getElementById('dayStart').value = start;
+            document.getElementById('dayEnd').value = end;
+            return teamScale * (week === 'All' ? 1 : 0.25) * ((end - start + 1) / 31);
         }
 
-        function resetFilters() {
+        function renderTables(multiplier) {
+            const scrubCurrent = baseData.scrub.current.slice().sort((a,b) => b.qa - a.qa).slice(0,5);
+            const scrubPrevious = baseData.scrub.previous.slice().sort((a,b) => b.qa - a.qa).slice(0,5);
+            const modelCurrent = baseData.model.current.slice().sort((a,b) => b.qa - a.qa).slice(0,5);
+            const modelPrevious = baseData.model.previous.slice().sort((a,b) => b.qa - a.qa).slice(0,5);
+            const rankingRows = items => makeRows(items, item => `<td class="py-1 px-1 text-gray-200">${item.name}</td><td class="py-1 px-1 text-right text-gray-300">${formatNumber(item.qa * multiplier)}</td><td class="py-1 px-1 text-right font-bold">${formatNumber(item.err * multiplier)}</td>`);
+            document.getElementById('scrubCurrentRows').innerHTML = rankingRows(scrubCurrent);
+            document.getElementById('scrubPreviousRows').innerHTML = rankingRows(scrubPrevious);
+            document.getElementById('modelCurrentRows').innerHTML = rankingRows(modelCurrent);
+            document.getElementById('modelPreviousRows').innerHTML = rankingRows(modelPrevious);
+            document.getElementById('teamRows').innerHTML = makeRows(baseData.team, item => `<td class="py-1.5 px-2 text-gray-200">${item.name}</td><td class="py-1.5 px-2 text-right font-bold">${formatNumber(item.err * multiplier)}</td>`);
+            document.getElementById('parameterRows').innerHTML = makeRows(baseData.parameters, item => `<td class="py-1.5 px-2 text-gray-200">${item.param}</td><td class="py-1.5 px-2 text-center text-gray-400">${item.workType}</td><td class="py-1.5 px-2 text-right font-bold text-red-400">${formatNumber(item.count * multiplier)}</td>`);
+        }
+
+        function updateDashboard() {
+            const multiplier = selectedMultiplier();
+            const scrubTotal = baseData.scrub.total * multiplier;
+            const scrubError = baseData.scrub.errors * multiplier;
+            const modelTotal = baseData.model.total * multiplier;
+            const modelError = baseData.model.errors * multiplier;
+            const totalQA = scrubTotal + modelTotal;
+            const totalError = scrubError + modelError;
+            document.getElementById('scrubTotal').textContent = formatNumber(scrubTotal);
+            document.getElementById('scrubError').textContent = formatNumber(scrubError);
+            document.getElementById('modelTotal').textContent = formatNumber(modelTotal);
+            document.getElementById('modelError').textContent = formatNumber(modelError);
+            document.getElementById('totalQA').textContent = formatNumber(totalQA);
+            document.getElementById('totalError').textContent = formatNumber(totalError);
+            document.getElementById('teamErrorTotal').textContent = formatNumber(totalError);
+            document.getElementById('scrubPct').textContent = `${((1 - scrubError / scrubTotal) * 100).toFixed(2)}%`;
+            document.getElementById('modelPct').textContent = `${((1 - modelError / modelTotal) * 100).toFixed(2)}%`;
+            document.getElementById('overallPct').textContent = `${((1 - totalError / totalQA) * 100).toFixed(2)}%`;
+            document.getElementById('trendRange').textContent = `${selectedMonth} ${document.getElementById('yearFilter').value}`;
+            renderTables(multiplier);
+            trendChart.data.datasets[0].data = baseData.monthlyTrend.totalQA.map(value => value * multiplier);
+            trendChart.data.datasets[1].data = baseData.monthlyTrend.totalError.map(value => value * multiplier);
+            weeklyChart.data.datasets[0].data = baseData.weekly.qa.map(value => value * multiplier);
+            weeklyChart.data.datasets[1].data = baseData.weekly.errors.map(value => value * multiplier);
+            trendChart.update();
+            weeklyChart.update();
+        }
+
+        function createCharts() {
+            trendChart = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: { labels: baseData.monthlyTrend.labels, datasets: [
+                    { label: 'Total QA', data: baseData.monthlyTrend.totalQA, borderColor: '#3b82f6', backgroundColor: 'rgba(37, 99, 235, 0.15)', fill: true, tension: 0.3, pointRadius: 4 },
+                    { label: 'Total Error', data: baseData.monthlyTrend.totalError, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.15)', fill: true, tension: 0.3, pointRadius: 4 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,.05)' } }, y: { min: 0, max: 1000, ticks: { color: '#9ca3af', stepSize: 200 }, grid: { color: 'rgba(255,255,255,.08)' } } } }
+            });
+            accuracyChart = new Chart(document.getElementById('accuracyChart'), {
+                type: 'bar',
+                data: { labels: baseData.accuracy.labels, datasets: [{ label: 'Accuracy %', data: baseData.accuracy.values, backgroundColor: ['#22c55e','#3b82f6','#eab308','#a855f7'], borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => `${context.raw}%` } } }, scales: { x: { ticks: { color: '#d1d5db' }, grid: { display: false } }, y: { min: 0, max: 100, ticks: { color: '#9ca3af', callback: value => `${value}%` }, grid: { color: 'rgba(255,255,255,.05)' } } } }
+            });
+            weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+                type: 'bar',
+                data: { labels: baseData.weekly.labels, datasets: [
+                    { label: 'Total QA', data: baseData.weekly.qa, backgroundColor: '#2563eb', borderRadius: 3 },
+                    { label: 'Total Error', data: baseData.weekly.errors, backgroundColor: '#ef4444', borderRadius: 3 }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d1d5db' } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,.05)' } } } }
+            });
+        }
+
+        document.querySelectorAll('.month-button').forEach(button => button.addEventListener('click', () => {
+            document.querySelectorAll('.month-button').forEach(item => item.className = 'month-button rounded-lg border border-cardBorder bg-black/50 px-4 py-1.5 text-xs font-semibold text-gray-300 hover:bg-gray-800');
+            button.className = 'month-button rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-black';
+            selectedMonth = button.dataset.month;
+            updateDashboard();
+        }));
+        ['teamFilter','weekFilter','yearFilter','dayStart','dayEnd'].forEach(id => document.getElementById(id).addEventListener('change', updateDashboard));
+        document.getElementById('resetFilters').addEventListener('click', () => {
             document.getElementById('teamFilter').value = 'All';
             document.getElementById('weekFilter').value = 'All';
-            
-            // Reset Jan month selection
-            const firstMonthBtn = document.querySelector('.month-btn');
-            if (firstMonthBtn) selectMonth(firstMonthBtn, 'Jan');
-
-            updateDashboardData();
-        }
-
-        // Window onload initialization
-        window.onload = function() {
-            renderTables(baseData);
-            initTrendChart(baseData.monthlyTrend);
-            initAccuracyChart(baseData.teamAccuracy);
-            initWeeklyChart(baseData.weekly);
-        };
-        
-       <!-- MANDATORY FOOTER -->
-    <footer class="mt-6 pt-4 border-t border-[#232631] text-center text-xs text-gray-400 space-y-1">
-        <p class="font-medium text-gray-300">
-            &copy; 2026 Mark Jayson Santos. Senior Quality Control Analyst Portfolio.
-        </p>
-        <p class="text-[11px] text-gray-500">
-            Sample data and projects for demonstration purposes. All confidential company metrics remain protected.
-        </p>
-    </footer>
-    
+            document.getElementById('yearFilter').value = '2026';
+            document.getElementById('dayStart').value = '1';
+            document.getElementById('dayEnd').value = '31';
+            selectedMonth = 'Jan';
+            document.querySelector('[data-month="Jan"]').click();
+        });
+        createCharts();
+        updateDashboard();
     </script>
 </body>
 </html>
