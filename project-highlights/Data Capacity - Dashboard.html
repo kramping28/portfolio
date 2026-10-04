@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC Executive Dashboard - Mark Jayson Santos Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dashDark: '#121316',
+                        cardDark: '#1a1b20',
+                        panelBorder: '#2a2c33',
+                        pbiGold: '#f59e0b',
+                        pbiGoldDark: '#b45309',
+                        pbiOrange: '#d97706',
+                        accentGreen: '#22c55e'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0d0e11;
+            color: #e5e7eb;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141519;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2e313b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+
+        .pbi-card {
+            background-color: #1a1c22;
+            border: 1px solid #2b2e38;
+            border-radius: 4px;
+        }
+
+        .pbi-btn {
+            background-color: #242731;
+            border: 1px solid #363a47;
+            color: #d1d5db;
+            transition: all 0.2s ease;
+        }
+
+        .pbi-btn:hover {
+            background-color: #323644;
+            color: #ffffff;
+        }
+
+        .pbi-btn-active {
+            background-color: #f59e0b !important;
+            color: #000000 !important;
+            font-weight: 700;
+            border-color: #f59e0b !important;
+        }
+
+        .custom-stripe tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .custom-stripe tr:hover {
+            background-color: rgba(245, 158, 11, 0.08);
+        }
+    </style>
+</head>
+<body class="p-2 md:p-4 min-h-screen flex flex-col justify-between">
+
+    <div class="max-w-[1920px] mx-auto w-full space-y-3">
+
+        <!-- TOP BAR / HEADER FILTER CONTROLS -->
+        <header class="pbi-card p-3 shadow-xl">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                
+                <!-- Title & Top KPI Summary Pills -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="border-l-4 border-pbiGold pl-3">
+                        <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white uppercase flex items-center gap-2">
+                            Quality Control Executive Dashboard
+                        </h1>
+                        <p class="text-[11px] text-gray-400 font-semibold tracking-wider">OPERATIONAL & PERFORMANCE METRICS</p>
+                    </div>
+
+                    <!-- Top 3 Quick Stats Cards -->
+                    <div class="flex items-center gap-2 ml-0 xl:ml-6 flex-wrap">
+                        <!-- Members -->
+                        <div class="bg-[#21242d] border border-[#2e323f] px-4 py-1.5 rounded flex items-center gap-3">
+                            <div>
+                                <span class="text-[10px] text-gray-400 uppercase font-bold block">Members</span>
+                                <span id="kpiMembers" class="text-xl font-extrabold text-white">71</span>
+                            </div>
+                            <div class="text-[10px] text-gray-400 border-l border-gray-700 pl-3">
+                                <div>vs Last Year: <span class="text-gray-300 font-bold">0</span></div>
+                                <div class="text-green-400 font-bold"><i class="fa-solid fa-triangle-exclamation rotate-180 text-[8px]"></i> 0</div>
+                            </div>
+                        </div>
+
+                        <!-- Utilization % -->
+                        <div class="bg-[#21242d] border border-[#2e323f] px-4 py-1.5 rounded flex items-center gap-3">
+                            <div>
+                                <span class="text-[10px] text-gray-400 uppercase font-bold block">Utilization %</span>
+                                <span id="kpiUtilization" class="text-xl font-extrabold text-pbiGold">101%</span>
+                            </div>
+                            <div class="text-[10px] text-gray-400 border-l border-gray-700 pl-3">
+                                <div>vs Last Year: <span class="text-gray-300 font-bold">0%</span></div>
+                                <div class="text-green-400 font-bold"><i class="fa-solid fa-triangle-exclamation rotate-180 text-[8px]"></i> 0</div>
+                            </div>
+                        </div>
+
+                        <!-- Total Volume -->
+                        <div class="bg-[#21242d] border border-[#2e323f] px-4 py-1.5 rounded flex items-center gap-3">
+                            <div>
+                                <span class="text-[10px] text-gray-400 uppercase font-bold block">Total Volume</span>
+                                <span id="kpiTotalVolume" class="text-xl font-extrabold text-white">19,607</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side Year/Month/Team Filters -->
+                <div class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-2 w-full xl:w-auto justify-end">
+                    
+                    <!-- Year Pills -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="setFilter('year', '2025', this)" class="pbi-btn px-2.5 py-1 text-xs rounded font-semibold">2025</button>
+                        <button onclick="setFilter('year', '2026', this)" class="pbi-btn pbi-btn-active px-2.5 py-1 text-xs rounded font-semibold">2026</button>
+                        <button onclick="setFilter('year', '2027', this)" class="pbi-btn px-2.5 py-1 text-xs rounded font-semibold">2027</button>
+                    </div>
+
+                    <!-- Month Buttons Grid -->
+                    <div class="grid grid-cols-6 sm:grid-cols-6 gap-0.5 text-[10px]">
+                        <button onclick="setFilter('month', 'Jan', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Jan</button>
+                        <button onclick="setFilter('month', 'Feb', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Feb</button>
+                        <button onclick="setFilter('month', 'Mar', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Mar</button>
+                        <button onclick="setFilter('month', 'Apr', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Apr</button>
+                        <button onclick="setFilter('month', 'May', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">May</button>
+                        <button onclick="setFilter('month', 'Jun', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Jun</button>
+                        <button onclick="setFilter('month', 'Jul', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Jul</button>
+                        <button onclick="setFilter('month', 'Aug', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Aug</button>
+                        <button onclick="setFilter('month', 'Sep', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Sep</button>
+                        <button onclick="setFilter('month', 'Oct', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Oct</button>
+                        <button onclick="setFilter('month', 'Nov', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Nov</button>
+                        <button onclick="setFilter('month', 'Dec', this)" class="month-pill pbi-btn px-1.5 py-1 rounded">Dec</button>
+                    </div>
+
+                    <!-- Team Selectors -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="setFilter('team', 'Team X', this)" class="team-pill pbi-btn px-2 py-1 text-xs rounded">Team X</button>
+                        <button onclick="setFilter('team', 'Team Y', this)" class="team-pill pbi-btn px-2 py-1 text-xs rounded">Team Y</button>
+                        <button onclick="setFilter('team', 'Team Z', this)" class="team-pill pbi-btn px-2 py-1 text-xs rounded">Team Z</button>
+                    </div>
+
+                    <!-- Reset Filters Button -->
+                    <button onclick="resetAllFilters()" class="bg-pbiGold/20 hover:bg-pbiGold/30 text-pbiGold border border-pbiGold/40 px-2.5 py-1 text-xs rounded font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate text-[10px]"></i> RESET FILTERS
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Day Selector Strip (1 to 31) -->
+            <div class="mt-2 pt-2 border-t border-[#2a2d37] flex items-center gap-1 overflow-x-auto pb-1 text-[11px]">
+                <span class="text-gray-400 font-bold px-1 text-[10px] uppercase">Day:</span>
+                <button onclick="setFilter('day', 'All', this)" class="day-pill pbi-btn pbi-btn-active px-2 py-0.5 rounded text-[10px]">All</button>
+                <script>
+                    for(let d=1; d<=31; d++) {
+                        document.write(`<button onclick="setFilter('day', '${d}', this)" class="day-pill pbi-btn px-1.5 py-0.5 rounded text-[10px] min-w-[24px]">${d}</button>`);
+                    }
+                </script>
+            </div>
+        </header>
+
+        <!-- MAIN DASHBOARD CONTENT GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+
+            <!-- LEFT COLUMN: Active Members & Filters Info & Refresh Widget (3 cols on large screen) -->
+            <div class="lg:col-span-2 space-y-3 flex flex-col justify-between">
+                
+                <!-- Active Members Card -->
+                <div class="pbi-card p-3">
+                    <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b border-[#2b2e38] pb-1">
+                        Active Members
+                    </h2>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between items-center text-gray-300">
+                            <span>Team X :</span>
+                            <span class="font-bold text-pbiGold">33</span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-300">
+                            <span>Team Y :</span>
+                            <span class="font-bold text-pbiGold">31</span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-300">
+                            <span>Team Z :</span>
+                            <span class="font-bold text-pbiGold">8</span>
+                        </div>
+                        <div class="pt-2 border-t border-[#2a2d37] flex justify-between items-center text-sm font-extrabold">
+                            <span class="text-emerald-400">Total :</span>
+                            <span id="activeMembersTotal" class="text-emerald-400">72</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Filters Summary Card -->
+                <div class="pbi-card p-3 flex-grow">
+                    <h2 class="text-xs font-bold text-pbiGold uppercase tracking-wider mb-2 border-b border-[#2b2e38] pb-1">
+                        Selected Filters
+                    </h2>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Year :</span>
+                            <span id="selYear" class="font-bold text-white">2026</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Month :</span>
+                            <span id="selMonth" class="font-bold text-white">All</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Day :</span>
+                            <span id="selDay" class="font-bold text-white">All</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Team :</span>
+                            <span id="selTeam" class="font-bold text-white">All</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refresh Indicator Box -->
+                <div class="pbi-card p-3 text-center space-y-2 bg-[#15171d]">
+                    <button onclick="triggerRefresh()" class="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 py-2 rounded text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate text-sm"></i> REFRESH
+                    </button>
+                    <div class="inline-block bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-semibold">
+                        ● Updated
+                    </div>
+                    <div class="text-[10px] text-gray-400">
+                        Data refreshed<br>
+                        <span id="lastRefreshTime" class="font-mono text-gray-300">27 Sep 2026 04:13 AM</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CENTER COLUMN: Combo Chart & Donut Charts (7 cols on large screen) -->
+            <div class="lg:col-span-7 space-y-3">
+                
+                <!-- Main Trend Chart Container -->
+                <div class="pbi-card p-3 flex flex-col justify-between min-h-[360px]">
+                    
+                    <!-- Date Range & PRE / POST Header Bar -->
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2 pb-2 border-b border-[#2b2e38]">
+                        <div class="flex items-center gap-3">
+                            <span id="dateRangeText" class="text-xs font-bold text-white bg-[#222530] px-2.5 py-1 rounded border border-[#313545]">
+                                January 01 - December 31
+                            </span>
+                            <div class="text-xs font-semibold text-gray-300 flex items-center gap-3">
+                                <span>PRE: <strong id="preVal" class="text-pbiGold">13,265</strong></span>
+                                <span class="text-gray-600">|</span>
+                                <span>POST: <strong id="postVal" class="text-pbiGold font-bold">6,342</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Granularity Toggle (Day, Week, Month) -->
+                        <div class="flex items-center gap-1 text-xs">
+                            <button onclick="setGranularity('Day', this)" class="granularity-btn pbi-btn pbi-btn-active px-3 py-1 rounded font-bold text-[11px]">Day</button>
+                            <button onclick="setGranularity('Week', this)" class="granularity-btn pbi-btn px-3 py-1 rounded font-bold text-[11px]">Week</button>
+                            <button onclick="setGranularity('Month', this)" class="granularity-btn pbi-btn px-3 py-1 rounded font-bold text-[11px]">Month</button>
+                        </div>
+                    </div>
+
+                    <!-- Main Chart Canvas -->
+                    <div class="relative flex-grow h-[260px] w-full">
+                        <canvas id="mainComboChart"></canvas>
+                    </div>
+
+                    <!-- Chart Legend Indicators -->
+                    <div class="flex flex-wrap justify-center items-center gap-4 mt-2 text-[11px] text-gray-300">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-amber-500 inline-block rounded-sm"></span> Team X</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-amber-600 inline-block rounded-sm"></span> Team Y</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-amber-700 inline-block rounded-sm"></span> Team Z</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-0.5 bg-red-500 inline-block"></span> Volume Trend</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Max Trend</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-white inline-block"></span> Min Trend</span>
+                    </div>
+                </div>
+
+                <!-- Middle Row: Volume by Team & Volume by Complexity Donut Charts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    
+                    <!-- Volume by Team Donut Chart -->
+                    <div class="pbi-card p-3">
+                        <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wide mb-2 text-center">
+                            Volume by Team
+                        </h2>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="w-[120px] h-[120px] relative">
+                                <canvas id="deptDonutChart"></canvas>
+                            </div>
+                            <div class="flex-1 space-y-1.5 text-xs pr-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="flex items-center gap-1.5 text-gray-300"><span class="w-2.5 h-2.5 bg-amber-500 inline-block rounded"></span> Team X</span>
+                                    <span class="font-bold text-gray-200">32.4% <span class="text-gray-400 font-normal">6,361</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="flex items-center gap-1.5 text-gray-300"><span class="w-2.5 h-2.5 bg-amber-600 inline-block rounded"></span> Team Y</span>
+                                    <span class="font-bold text-gray-200">52.4% <span class="text-gray-400 font-normal">10,275</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="flex items-center gap-1.5 text-gray-300"><span class="w-2.5 h-2.5 bg-amber-700 inline-block rounded"></span> Team Z</span>
+                                    <span class="font-bold text-gray-200">15.2% <span class="text-gray-400 font-normal">2,971</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volume by Complexity Donut Chart -->
+                    <div class="pbi-card p-3">
+                        <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wide mb-2 text-center">
+                            Volume by Complexity
+                        </h2>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="w-[120px] h-[120px] relative">
+                                <canvas id="complexityDonutChart"></canvas>
+                            </div>
+                            <div class="flex-1 space-y-1.5 text-xs pr-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="flex items-center gap-1.5 text-gray-300"><span class="w-2.5 h-2.5 bg-amber-400 inline-block rounded"></span> Simple</span>
+                                    <span class="font-bold text-gray-200">87.4% <span class="text-gray-400 font-normal">17,146</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="flex items-center gap-1.5 text-gray-300"><span class="w-2.5 h-2.5 bg-amber-600 inline-block rounded"></span> Medium</span>
+                                    <span class="font-bold text-gray-200">9.7% <span class="text-gray-400 font-normal">1,906</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="flex items-center gap-1.5 text-gray-300"><span class="w-2.5 h-2.5 bg-amber-800 inline-block rounded"></span> Complex</span>
+                                    <span class="font-bold text-gray-200">2.8% <span class="text-gray-400 font-normal">555</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Sample Categories (LOB) Table (3 cols on large screen) -->
+            <div class="lg:col-span-3 pbi-card p-3 flex flex-col justify-between max-h-[560px]">
+                <div>
+                    <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 pb-1 border-b border-[#2b2e38] flex justify-between items-center">
+                        <span>Sample Categories</span>
+                        <span class="text-[10px] text-gray-400">PRE / POST Breakdown</span>
+                    </h2>
+                    
+                    <div class="overflow-y-auto max-h-[460px] pr-1">
+                        <table class="w-full text-xs text-left custom-stripe">
+                            <thead class="sticky top-0 bg-[#1e2027] text-gray-400 text-[11px]">
+                                <tr>
+                                    <th class="py-1.5 px-2">Sample</th>
+                                    <th class="py-1.5 px-1 text-right">PRE</th>
+                                    <th class="py-1.5 px-1 text-right">POST</th>
+                                    <th class="py-1.5 px-2 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lobTableBody" class="divide-y divide-[#272a34] font-medium text-gray-300">
+                                <!-- Dynamically filled in JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table Summary Footer -->
+                <div class="mt-2 pt-2 border-t border-[#2b2e38] flex justify-between items-center text-xs font-extrabold text-pbiGold px-2 bg-[#14151a] rounded">
+                    <span>Total</span>
+                    <div class="flex gap-4">
+                        <span>13,265</span>
+                        <span>6,342</span>
+                        <span class="text-white">19,607</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM ROW SECTION: Cross Support Matrix & Analyst Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+
+            <!-- Cross Support Matrix Card (4 cols) -->
+            <div class="lg:col-span-4 pbi-card p-3">
+                <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 border-b border-[#2b2e38] pb-1">
+                    Cross Support Matrix
+                </h2>
+                <div class="grid grid-cols-12 gap-2 items-center">
+                    
+                    <div class="col-span-4 space-y-2 text-center">
+                        <div class="bg-[#222530] p-2 rounded border border-[#2d3140]">
+                            <span class="text-2xl font-extrabold text-pbiGold block">11</span>
+                            <span class="text-[10px] text-gray-400 uppercase">Given</span>
+                        </div>
+                        <div class="bg-[#222530] p-2 rounded border border-[#2d3140]">
+                            <span class="text-2xl font-extrabold text-pbiGold block">11</span>
+                            <span class="text-[10px] text-gray-400 uppercase">Received</span>
+                        </div>
+                    </div>
+
+                    <!-- Matrix Table -->
+                    <div class="col-span-8 overflow-x-auto">
+                        <table class="w-full text-xs text-center border border-[#2b2e38]">
+                            <thead class="bg-[#222530] text-gray-400 text-[10px]">
+                                <tr>
+                                    <th class="py-1 border-r border-[#2b2e38]"></th>
+                                    <th class="py-1 border-r border-[#2b2e38]">Team X</th>
+                                    <th class="py-1 border-r border-[#2b2e38]">Team Y</th>
+                                    <th class="py-1 border-r border-[#2b2e38]">Team Z</th>
+                                    <th class="py-1 text-emerald-400">Given</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#2b2e38] text-gray-300">
+                                <tr>
+                                    <td class="py-1 px-1 font-bold text-gray-400 bg-[#1e2028] border-r border-[#2b2e38]">Team X</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">363</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">412</td>
+                                    <td class="py-1 font-bold text-emerald-400">775</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 px-1 font-bold text-gray-400 bg-[#1e2028] border-r border-[#2b2e38]">Team Y</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 font-bold text-emerald-400">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 px-1 font-bold text-gray-400 bg-[#1e2028] border-r border-[#2b2e38]">Team Z</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">949</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 font-bold text-emerald-400">949</td>
+                                </tr>
+                                <tr class="bg-[#181a20] font-bold text-pbiGold">
+                                    <td class="py-1 px-1 border-r border-[#2b2e38]">Received</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">0</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">1,312</td>
+                                    <td class="py-1 border-r border-[#2b2e38]">412</td>
+                                    <td class="py-1 text-white">1,724</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Support Given Analyst | Top 5 Only (4 cols) -->
+            <div class="lg:col-span-4 pbi-card p-3 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 border-b border-[#2b2e38] pb-1 flex justify-between">
+                        <span>Support Given Analyst</span>
+                        <span class="text-pbiGold text-[10px]">Top 5 Only</span>
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left custom-stripe">
+                            <thead class="text-gray-400 border-b border-[#2b2e38] text-[10px]">
+                                <tr>
+                                    <th class="py-1 px-2">Analyst</th>
+                                    <th class="py-1 px-2">To</th>
+                                    <th class="py-1 px-2">Sample</th>
+                                    <th class="py-1 px-2 text-right">Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supportGivenBody" class="divide-y divide-[#272a34] text-gray-300">
+                                <tr>
+                                    <td class="py-1.5 px-2 text-gray-400 italic" colspan="4">No support given analyst found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-[10px] text-gray-500 text-right mt-2">HC | Vol 0</div>
+            </div>
+
+            <!-- Support Received Analyst | Top 5 Only (4 cols) -->
+            <div class="lg:col-span-4 pbi-card p-3 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 border-b border-[#2b2e38] pb-1 flex justify-between">
+                        <span>Support Received Analyst</span>
+                        <span class="text-pbiGold text-[10px]">Top 5 Only</span>
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left custom-stripe">
+                            <thead class="text-gray-400 border-b border-[#2b2e38] text-[10px]">
+                                <tr>
+                                    <th class="py-1 px-2">Analyst</th>
+                                    <th class="py-1 px-2">Team</th>
+                                    <th class="py-1 px-2">Sample</th>
+                                    <th class="py-1 px-2 text-right">Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supportReceivedBody" class="divide-y divide-[#272a34] text-gray-300">
+                                <tr>
+                                    <td class="py-1.5 px-2 text-gray-400 italic" colspan="4">No support received analyst found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-[10px] text-gray-500 text-right mt-2">HC | Vol 0</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MANDATORY PORTFOLIO FOOTER -->
+    <footer class="mt-6 pt-4 border-t border-[#252833] text-center text-xs text-gray-400 space-y-1">
+        <p class="font-medium text-gray-300">
+            &copy; 2026 Mark Jayson Santos. Senior Quality Control Analyst Portfolio.
+        </p>
+        <p class="text-[11px] text-gray-500">
+            Sample data and projects for demonstration purposes. All confidential company metrics remain protected.
+        </p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Sample Categories (LOB) dataset
+        const lobData = [
+            { name: "Sample 1", pre: 8191, post: 1928 },
+            { name: "Sample 2", pre: 2904, post: 0 },
+            { name: "Sample 3", pre: 356, post: 1662 },
+            { name: "Sample 4", pre: 588, post: 493 },
+            { name: "Sample 5", pre: 0, post: 584 },
+            { name: "Sample 6", pre: 156, post: 354 },
+            { name: "Sample 7", pre: 142, post: 224 },
+            { name: "Sample 8", pre: 79, post: 269 },
+            { name: "Sample 9", pre: 26, post: 294 },
+            { name: "Sample 10", pre: 134, post: 129 },
+            { name: "Sample 11", pre: 0, post: 186 },
+            { name: "Sample 12", pre: 163, post: 0 },
+            { name: "Sample 13", pre: 51, post: 77 },
+            { name: "Sample 14", pre: 63, post: 47 },
+            { name: "Sample 15", pre: 101, post: 0 }
+        ];
+
+        // Active filter state
+        let currentFilters = {
+            year: '2026',
+            month: 'All',
+            day: 'All',
+            team: 'All',
+            granularity: 'Day'
+        };
+
+        let mainChartInstance = null;
+        let deptChartInstance = null;
+        let complexityChartInstance = null;
+
+        // Render Sample Categories Table
+        function renderLOBTable() {
+            const tbody = document.getElementById('lobTableBody');
+            let maxTotal = Math.max(...lobData.map(d => d.pre + d.post));
+            
+            tbody.innerHTML = lobData.map(item => {
+                let total = item.pre + item.post;
+                let pct = (total / maxTotal) * 100;
+                return `
+                    <tr>
+                        <td class="py-1.5 px-2 font-medium text-gray-200">
+                            <div class="flex items-center gap-2">
+                                <div class="w-12 bg-gray-800 h-1.5 rounded overflow-hidden">
+                                    <div class="bg-pbiGold h-full" style="width: ${pct}%"></div>
+                                </div>
+                                <span>${item.name}</span>
+                            </div>
+                        </td>
+                        <td class="py-1.5 px-1 text-right text-gray-400 font-mono">${item.pre.toLocaleString()}</td>
+                        <td class="py-1.5 px-1 text-right text-gray-400 font-mono">${item.post.toLocaleString()}</td>
+                        <td class="py-1.5 px-2 text-right font-bold text-white font-mono">${total.toLocaleString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Initialize Main Combo Bar & Line Chart
+        function initMainChart() {
+            const ctx = document.getElementById('mainComboChart').getContext('2d');
+            if (mainChartInstance) mainChartInstance.destroy();
+
+            // Generate 31 days data
+            const labels = Array.from({length: 31}, (_, i) => i + 1);
+            const teamXData = labels.map(() => Math.floor(Math.random() * 200) + 150);
+            const teamYData = labels.map(() => Math.floor(Math.random() * 250) + 180);
+            const teamZData = labels.map(() => Math.floor(Math.random() * 100) + 50);
+
+            const trendLine = labels.map((_, i) => (teamXData[i] + teamYData[i] + teamZData[i]) * 0.9);
+
+            mainChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Volume Trend',
+                            data: trendLine,
+                            borderColor: '#ef4444',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Team X',
+                            data: teamXData,
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 1
+                        },
+                        {
+                            label: 'Team Y',
+                            data: teamYData,
+                            backgroundColor: '#d97706',
+                            borderRadius: 1
+                        },
+                        {
+                            label: 'Team Z',
+                            data: teamZData,
+                            backgroundColor: '#b45309',
+                            borderRadius: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1a1c22',
+                            borderColor: '#363a47',
+                            borderWidth: 1,
+                            titleFont: { size: 11, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#9ca3af', font: { size: 9 } }
+                        },
+                        y: {
+                            stacked: true,
+                            max: 800,
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#9ca3af', font: { size: 9 }, stepSize: 200 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize Donut Charts
+        function initDonutCharts() {
+            // Team Donut
+            const ctx1 = document.getElementById('deptDonutChart').getContext('2d');
+            if (deptChartInstance) deptChartInstance.destroy();
+
+            deptChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Team X', 'Team Y', 'Team Z'],
+                    datasets: [{
+                        data: [6361, 10275, 2971],
+                        backgroundColor: ['#f59e0b', '#d97706', '#b45309'],
+                        borderWidth: 2,
+                        borderColor: '#1a1c22'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Complexity Donut
+            const ctx2 = document.getElementById('complexityDonutChart').getContext('2d');
+            if (complexityChartInstance) complexityChartInstance.destroy();
+
+            complexityChartInstance = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Simple', 'Medium', 'Complex'],
+                    datasets: [{
+                        data: [17146, 1906, 555],
+                        backgroundColor: ['#fbbf24', '#d97706', '#78350f'],
+                        borderWidth: 2,
+                        borderColor: '#1a1c22'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Filter Actions
+        function setFilter(type, value, btnElem) {
+            currentFilters[type] = value;
+            document.getElementById(`sel${type.charAt(0).toUpperCase() + type.slice(1)}`).innerText = value;
+
+            // Handle active button styles per group
+            if (btnElem) {
+                const parent = btnElem.parentElement;
+                parent.querySelectorAll('button').forEach(b => b.classList.remove('pbi-btn-active'));
+                btnElem.classList.add('pbi-btn-active');
+            }
+
+            updateDashboardMetrics();
+        }
+
+        function setGranularity(mode, btnElem) {
+            currentFilters.granularity = mode;
+            document.querySelectorAll('.granularity-btn').forEach(b => b.classList.remove('pbi-btn-active'));
+            btnElem.classList.add('pbi-btn-active');
+            initMainChart();
+        }
+
+        function updateDashboardMetrics() {
+            // Dynamic subtle calculations to demonstrate filter effects
+            let mult = 1.0;
+            if (currentFilters.team === 'Team X') mult = 0.4;
+            if (currentFilters.team === 'Team Y') mult = 0.5;
+            if (currentFilters.team === 'Team Z') mult = 0.2;
+            if (currentFilters.month !== 'All') mult *= 0.3;
+
+            const baseVol = 19607;
+            const newVol = Math.round(baseVol * mult);
+            document.getElementById('kpiTotalVolume').innerText = newVol.toLocaleString();
+            document.getElementById('preVal').innerText = Math.round(newVol * 0.67).toLocaleString();
+            document.getElementById('postVal').innerText = Math.round(newVol * 0.33).toLocaleString();
+
+            if (mainChartInstance) {
+                mainChartInstance.data.datasets[1].data = mainChartInstance.data.datasets[1].data.map(v => Math.round(v * mult));
+                mainChartInstance.update();
+            }
+        }
+
+        function resetAllFilters() {
+            currentFilters = { year: '2026', month: 'All', day: 'All', team: 'All', granularity: 'Day' };
+            document.getElementById('selYear').innerText = '2026';
+            document.getElementById('selMonth').innerText = 'All';
+            document.getElementById('selDay').innerText = 'All';
+            document.getElementById('selTeam').innerText = 'All';
+
+            document.querySelectorAll('.month-pill, .team-pill, .day-pill').forEach(b => b.classList.remove('pbi-btn-active'));
+            document.querySelector('.day-pill').classList.add('pbi-btn-active');
+
+            updateDashboardMetrics();
+        }
+
+        function triggerRefresh() {
+            const now = new Date();
+            const timeStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            document.getElementById('lastRefreshTime').innerText = timeStr;
+            updateDashboardMetrics();
+        }
+
+        // Initialize On Load
+        window.onload = function() {
+            renderLOBTable();
+            initMainChart();
+            initDonutCharts();
+        };
+    </script>
+</body>
+</html>
